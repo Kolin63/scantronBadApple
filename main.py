@@ -5,10 +5,10 @@ import math
 import shutil
 import os
 
-fps = 0.5
+fps = 1
+stopframe = 4
 resolution = (32, 24) 
 circleRadius = 16
-circleSize = (52, 45)
 black = (0, 0, 0)
 
 video = VideoFileClip("video.webm")
@@ -47,7 +47,16 @@ for i in range(0, totalFrames):
             average = average / averageLength
             if (average > 0.5):
                 lowResFrames[i, x, y] = 1
+    
+    if (i == stopframe):
+        break
 
+
+if (stopframe != -1):
+    for x in range(0, resolution[0]):
+        for y in range(0, resolution[1]):
+            print(str(math.floor(lowResFrames[stopframe,y,x])) + " ", end="")
+        print("")
 
 
 print("\n\n\n\n\n\n")
@@ -97,6 +106,7 @@ for i in range(0, lowResFrames.shape[0]):
 
             if (lowResFrames[i,x,y] == 1): 
                 continue
+                # pass
 
             # Center Coordinates
             posX = math.floor(x * multX + circleRadius + offsetX)
@@ -108,8 +118,9 @@ for i in range(0, lowResFrames.shape[0]):
             # print("\tDrawing on Image " + str(i) + " (" + str(x) + ", " + str(y) + ")")
 
     image.save(imagePath)
+    if (i == stopframe):
+        break
 
-    if (i == 1000): break
 
 finishedVideo = ImageSequenceClip(imageFolder, fps=fps)
 
