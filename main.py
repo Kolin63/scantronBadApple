@@ -1,4 +1,4 @@
-from moviepy import VideoFileClip, ImageSequenceClip
+from moviepy import VideoFileClip, ImageSequenceClip, AudioFileClip, CompositeAudioClip
 from PIL import Image, ImageDraw
 import numpy as np
 import math
@@ -49,8 +49,6 @@ for i in range(0, totalFrames):
                 lowResFrames[i, x, y] = 1
 
 
-
-input("STOP ITTT")
 
 print("\n\n\n\n\n\n")
 if (os.path.isdir(imageFolder)): 
@@ -114,4 +112,9 @@ for i in range(0, lowResFrames.shape[0]):
     if (i == 1000): break
 
 finishedVideo = ImageSequenceClip(imageFolder, fps=fps)
+
+audio = AudioFileClip("video.webm")
+newAudio = CompositeAudioClip([audio])
+finishedVideo.audio = newAudio
+
 finishedVideo.write_videofile(finishedVideoLocation)
