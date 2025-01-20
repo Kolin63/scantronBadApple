@@ -5,8 +5,8 @@ import math
 import shutil
 import os
 
-fps = 1
-stopframe = 4
+fps = 30
+stopframe = -1
 resolution = (32, 24) 
 circleRadius = 16
 black = (0, 0, 0)
@@ -29,15 +29,15 @@ for i in range(0, totalFrames):
     print("Getting Colors of Frame " + str(i))
     frame = video.get_frame(i / fps)
     shape = frame.shape
-    ratio = [shape[0] / resolution[0], shape[1] / resolution[1]]
+    ratio = [shape[0] / resolution[1], shape[1] / resolution[0]]  
     
-    for x in range(0, resolution[0]):
-        for y in range(0, resolution[1]):
+    for y in range(0, resolution[1]):  
+        for x in range(0, resolution[0]):  
 
             average = 0
             averageLength = 0
-            for a in range(math.floor(x * ratio[0]), math.floor(x * ratio[0] + ratio[0])):
-                for b in range(math.floor(y * ratio[1]), math.floor(y * ratio[1] + ratio[1])):
+            for a in range(math.floor(y * ratio[0]), math.floor(y * ratio[0] + ratio[0])):  
+                for b in range(math.floor(x * ratio[1]), math.floor(x * ratio[1] + ratio[1])):  
                     pixel = frame[a, b, 0]
                     if (pixel > 128): pixel = 1
                     else: pixel = 0
@@ -46,26 +46,28 @@ for i in range(0, totalFrames):
             
             average = average / averageLength
             if (average > 0.5):
-                lowResFrames[i, x, y] = 1
+                lowResFrames[i, x, y] = 1  
+            else:
+                lowResFrames[i, x, y] = 0
     
     if (i == stopframe):
         break
 
 
-if (stopframe != -1):
-    for x in range(0, resolution[0]):
-        for y in range(0, resolution[1]):
-            print(str(math.floor(lowResFrames[stopframe,y,x])) + " ", end="")
-        print("")
+lowResFrames = np.rot90(lowResFrames, axes=(2, 1))
 
 
 print("\n\n\n\n\n\n")
 if (os.path.isdir(imageFolder)): 
     shutil.rmtree(imageFolder)
 os.mkdir(imageFolder)
+
+
 for i in range(0, lowResFrames.shape[0]):
-    print("Drawing on Image " + str(i))
-    imagePath = imageFolder + "/" + str(i) + ".png"
+    indexStr = str(i)
+    indexStr = indexStr.zfill(8)
+    print("Drawing on Image " + indexStr)
+    imagePath = imageFolder + "/" + indexStr + ".png"
     shutil.copyfile(os.getcwd() + "/scantron.png", imagePath)
     
     image = Image.open(imagePath)
@@ -73,44 +75,44 @@ for i in range(0, lowResFrames.shape[0]):
 
     offsetX = 220
     multX = 52
-    for x in range(0, resolution[0]):
-        if (x == 10):
+    for y in range(0, lowResFrames.shape[2]):  
+        if (y == 10):
             offsetX -= 20
             continue
-        if (x >= 21):
+        if (y >= 21):
             offsetX = 286
             multX = 48
-        if (x == 21):
+        if (y == 21):
             continue
 
         offsetY = 415
         multY = 46
-        for y in range(0, resolution[1]):
-            if (y == 11 and x > 21):
+        for x in range(0, lowResFrames.shape[1]):  
+            if (x == 11 and y > 21):
                 multX = 52
                 offsetX -= 105
                 multY = 46
-            if (y == 5 and x < 21 or y == 11 or y == 23):
+            if (x == 5 and y < 21 or x == 11 or x == 23):
                 offsetY += 10.5
                 continue
-            if (y == 17):
+            if (x == 17):
                 offsetY += 8
                 continue
-            if (x > 21 and y < 11):
+            if (y > 21 and x < 11):
                 multY = 42.5
-                if (y == 9):
+                if (x == 9):
                     offsetY += 10
                     continue
-                if (y == 10 and x < 27):
+                if (x == 10 and y < 27):
                     continue
 
-            if (lowResFrames[i,x,y] == 1): 
+            if (lowResFrames[i, x, y] == 1):  
                 continue
                 # pass
 
             # Center Coordinates
-            posX = math.floor(x * multX + circleRadius + offsetX)
-            posY = math.floor(y * multY + circleRadius + offsetY)
+            posX = math.floor(y * multX + circleRadius + offsetX)  
+            posY = math.floor(x * multY + circleRadius + offsetY) 
 
             # gradient = (math.floor(totalFrames / 255 * i), x * 7, y * 7)
             draw.ellipse((posX - circleRadius, posY - circleRadius, posX + circleRadius, posY + circleRadius), fill=black)
