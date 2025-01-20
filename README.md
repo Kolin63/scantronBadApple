@@ -3,3 +3,4 @@ I was really bored during one of my midterms because it was a long scantron. I w
 
 So I wrote some Python using MoviePy to read from a video file of Bad Apple and downscale it to the size of a 100-question Scantron sheet. 
 
+Watch it on YouTube [here](https://www.youtube.com/watch?v=pTEDf78h4-4).
