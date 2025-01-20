@@ -29,32 +29,26 @@ for i in range(0, totalFrames):
     print("Getting Colors of Frame " + str(i))
     frame = video.get_frame(i / fps)
     shape = frame.shape
-    ratio = [shape[0] / resolution[1], shape[1] / resolution[0]]  
+    ratio_y = shape[0] / resolution[1]
+    ratio_x = shape[1] / resolution[0]
     
     for y in range(0, resolution[1]):  
+        y_start = math.floor(y * ratio_y)
+        y_end = math.floor(y * ratio_y + ratio_y)
+        
         for x in range(0, resolution[0]):  
+            x_start = math.floor(x * ratio_x)
+            x_end = math.floor(x * ratio_x + ratio_x)
 
-            average = 0
-            averageLength = 0
-            for a in range(math.floor(y * ratio[0]), math.floor(y * ratio[0] + ratio[0])):  
-                for b in range(math.floor(x * ratio[1]), math.floor(x * ratio[1] + ratio[1])):  
-                    pixel = frame[a, b, 0]
-                    if (pixel > 128): pixel = 1
-                    else: pixel = 0
-                    average += pixel
-                    averageLength += 1
-            
-            average = average / averageLength
-            if (average > 0.5):
-                lowResFrames[i, x, y] = 1  
-            else:
-                lowResFrames[i, x, y] = 0
+            average = np.mean(frame[y_start:y_end, x_start:x_end, 0] > 128)
+            lowResFrames[i, x, y] = 1 if average > 0.5 else 0
     
     if (i == stopframe):
         break
 
 
 lowResFrames = np.rot90(lowResFrames, axes=(2, 1))
+lowResFrames = np.flip(lowResFrames, 2)
 
 
 print("\n\n\n\n\n\n")
@@ -64,11 +58,10 @@ os.mkdir(imageFolder)
 
 
 for i in range(0, lowResFrames.shape[0]):
-    indexStr = str(i)
-    indexStr = indexStr.zfill(8)
+    indexStr = str(i).zfill(8)
     print("Drawing on Image " + indexStr)
-    imagePath = imageFolder + "/" + indexStr + ".png"
-    shutil.copyfile(os.getcwd() + "/scantron.png", imagePath)
+    imagePath = os.path.join(imageFolder, indexStr + ".png")
+    shutil.copyfile(os.path.join(os.getcwd(), "scantron.png"), imagePath)
     
     image = Image.open(imagePath)
     draw = ImageDraw.Draw(image)
